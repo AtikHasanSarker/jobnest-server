@@ -149,9 +149,17 @@ async function run() {
         createdAt: new Date(),
       };
       const result = await subscriptionCollection.insertOne(subscriptionInfo);
-      res.send(result);
+      const filter = {email: data.email};
+      const updateDocument ={
+        $set: {
+          plan: data.planId,
+        }
+      }
+      const updatedResult = await userCollection.updateOne(filter, updateDocument);
+
+      res.send(result, updatedResult);
     });
-    
+
 
     app.listen(port, () => {
       console.log(`Express server is running on http://localhost:${port}`);
