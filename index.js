@@ -29,6 +29,7 @@ async function run() {
     const userCollection = db.collection("user");
     const applicationCollection = db.collection("applications");
     const planCollection = db.collection("plans");
+    const subscriptionCollection = db.collection("subscriptions");
 
     app.get("/", (req, res) => {
       res.send("JobNest server is running");
@@ -133,11 +134,24 @@ async function run() {
     app.get("/api/plans", async (req, res) => {
       const query = {};
       if(req.query.plan_id){
-        query.plan_id = req.query.plan_id;
+        query.name = req.query.plan_id;
       }
-      const result = await planCollection.findOne(query);
-      res.json(result);
+      const plan = await planCollection.findOne(query);
+      res.send(plan);
     });
+
+
+    //Subscriptions
+    app.post("/api/subscriptions", async (req, res) => {
+      const data = req.body;
+      const subscriptionInfo = {
+        ...data,
+        createdAt: new Date(),
+      };
+      const result = await subscriptionCollection.insertOne(subscriptionInfo);
+      res.send(result);
+    });
+    
 
     app.listen(port, () => {
       console.log(`Express server is running on http://localhost:${port}`);
