@@ -128,6 +128,20 @@ async function run() {
         res.status(500).json({ message: "server error" });
       }
     });
+
+    app.patch("/api/company/:id", async (req, res) => {
+      const id = req.params.id;
+      const company = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDocument = {
+        $set: {
+          status: company.status,
+        },
+      };
+      const result = await companyCollection.updateOne(filter, updateDocument);
+      res.json(result);
+
+    });
     
 
     //Plans
