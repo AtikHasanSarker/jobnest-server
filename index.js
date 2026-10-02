@@ -95,6 +95,7 @@ async function run() {
       res.send(result);
     });
 
+
     //company related api
     app.get("/api/companies", async (req, res) => {
       const cursor = companyCollection.find();
@@ -129,18 +130,17 @@ async function run() {
       }
     });
 
-    app.patch("/api/company/:id", async (req, res) => {
+    app.patch("/api/companies/:id", async (req, res) => {
       const id = req.params.id;
-      const company = req.body;
+      const updatedCompany = req.body;
       const filter = { _id: new ObjectId(id) };
       const updateDocument = {
         $set: {
-          status: company.status,
+          status: updatedCompany.status,
         },
       };
       const result = await companyCollection.updateOne(filter, updateDocument);
       res.json(result);
-
     });
     
 
