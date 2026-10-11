@@ -51,10 +51,16 @@ async function run() {
 
       const query = { token: token };
       const session = await sessionCollection.findOne(query);
+      if (!session) {
+        return res.status(401).json({ message: "Unauthorized Access" });
+      }
       const userId = session?.userId;
 
       const userQuery = { _id: userId };
       const user = await userCollection.findOne(userQuery);
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized Access" });
+      }
       req.user = user;
       next();
     };
@@ -62,6 +68,14 @@ async function run() {
     //must be used after verifyToken middleware
     const verifySeeker = async (req, res, next) => {
       if (req.user?.role !== "seeker") {
+        return res.status(403).json({ message: "Forbidden Access" });
+      }
+      next();
+    }
+
+    //must be used after verifyToken middleware
+    const verifyRecruiter = async (req, res, next) => {
+      if (req.user?.role !== "recruiter") {
         return res.status(403).json({ message: "Forbidden Access" });
       }
       next();
@@ -200,7 +214,7 @@ async function run() {
       }
     });
 
-    app.patch("/api/companies/:id", verifyToken, async (req, res) => {
+    app.patch("/api/companies/:id", verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const updatedCompany = req.body;
       const filter = { _id: new ObjectId(id) };
