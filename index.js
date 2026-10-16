@@ -89,7 +89,7 @@ async function run() {
       next();
     }
 
-    
+
 
     app.get("/", (req, res) => {
       res.send("JobNest server is running");
@@ -127,6 +127,19 @@ async function run() {
       if (req.query.status) {
         query.status = req.query.status;
       }
+
+      //pagination related work
+      if (req.query.page) {
+        const page = parseInt(req.query.page);
+        const perPage = parseInt(req.query.perPage) || 12;
+        const skipItem = (page - 1) * perPage;
+        const total = await jobCollection.countDocuments(query);
+
+        const cursor = jobCollection.find(query).skip(skipItem).limit(perPage);
+        const jobs = await cursor.toArray();
+        return res.json({ total, jobs });
+      }
+
       const cursor = jobCollection.find(query);
       const result = await cursor.toArray();
       res.json(result);
