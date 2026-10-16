@@ -145,6 +145,12 @@ async function run() {
       res.json(result);
     });
 
+    app.get("/api/featured-jobs", async (req, res) => {
+      const cursor = jobCollection.find().limit(12);
+      const result = await cursor.toArray();
+      res.json(result);
+    });
+
     app.get("/api/jobs/:id", async (req, res) => {
       const id = req.params.id;
       const result = await jobCollection.findOne({ _id: new ObjectId(id) });
