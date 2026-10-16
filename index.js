@@ -89,8 +89,7 @@ async function run() {
       next();
     }
 
-
-
+    
 
     app.get("/", (req, res) => {
       res.send("JobNest server is running");
@@ -104,10 +103,27 @@ async function run() {
 
     app.get("/api/jobs", async (req, res) => {
       const query = {};
+      // job filter related query
+      if(req.query.search) {
+        query.$or = [
+          { jobTitle: { $regex: req.query.search, $options: "i" } },
+          { companyName: { $regex: req.query.search, $options: "i" } },
+          { jobCategory: { $regex: req.query.search, $options: "i" } },
+          { requirements: { $regex: req.query.search, $options: "i" } },
+          { responsibilities: { $regex: req.query.search, $options: "i" } },
+        ];
+      }
+      if (req.query.jobCategory) {
+        query.jobCategory = req.query.jobCategory;
+      }
+      if (req.query.jobType) {
+        query.jobType = req.query.jobType;
+      }
+
+      // company related query
       if (req.query.companyId) {
         query.companyId = req.query.companyId;
       }
-
       if (req.query.status) {
         query.status = req.query.status;
       }
@@ -131,6 +147,7 @@ async function run() {
       const result = await jobCollection.insertOne(newJob);
       res.json(result);
     });
+
 
     //application related api
     app.get("/api/applications", verifyToken, verifySeeker, async (req, res) => {
@@ -177,12 +194,7 @@ async function run() {
     });
 
     app.get("/api/companies2", async (req, res) => {
-      const pipeline = [
-        {
-          $skip: 4,
-        }
-      ];
-      const cursor = companyCollection.aggregate(pipeline);
+      const cursor = companyCollection.find();
       const result = await cursor.toArray();
       res.json(result);
     });
